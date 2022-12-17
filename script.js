@@ -1,47 +1,51 @@
-let myLeads = [];
-const inputEl = document.getElementById('input-el');
-const inputBtn = document.getElementById('input-btn');
-const deleteBtn = document.getElementById('delete-btn');
-const saveBtn = document.getElementById('save-btn');
-const ulEl = document.getElementById('ul-el');
+let myTrackedSites = []
+const inputEl = document.querySelector('#input-el')
+const inputBtn = document.querySelector('#input-btn')
+const saveTab = document.querySelector('#save-tab')
+const deleteBtn = document.querySelector('#delete-btn');
+let ulEl = document.querySelector('#ul-el')
+const trackedSitesFromLocalStorage = JSON.parse(localStorage.getItem('myTrackedSites'))
 
-let leadsFromLocalStorage = JSON.parse(localStorage.getItem("myLeads"));
-
-if(leadsFromLocalStorage) {
-    myLeads = leadsFromLocalStorage;
-    render();
+//console.log(trackedSitesFromLocalStorage);
+if(trackedSitesFromLocalStorage != null) {
+    myTrackedSites = trackedSitesFromLocalStorage
+    displayMyLinks()
 }
 
 inputBtn.addEventListener('click', function() {
-    myLeads.push(inputEl.value);
-    inputEl.value = '';
-    localStorage.setItem("myLeads", JSON.stringify(myLeads))
-    render();
+    //console.log('Button works')
+    myTrackedSites.push(inputEl.value)
+    inputEl.value = ''
+    localStorage.setItem('myTrackedSites', JSON.stringify(myTrackedSites))
+    displayMyLinks()
+    //console.log(localStorage.getItem('myTrackedSites'))
 })
 
-function render() {
-    let myLeadsLinks = '';
-    for(let i = 0; i < myLeads.length; i++) {
-        myLeadsLinks += `
-                        <li>
-                            <a href='${myLeads[i]}' target='_blank'>
-                                ${myLeads[i]}
-                            </a>
-                        </li>`;
+saveTab.addEventListener('click', function() {
+    chrome.tabs.query({active: true, currentWindow: true})
+    myTrackedSites.push(tabs[0].url)
+    localStorage.setItem('myTrackedSites', JSON.stringify(myTrackedSites))
+    displayMyLinks()
+})
+ 
+function displayMyLinks() {
+    let linksList = '';
+    for(let i = 0; i < myTrackedSites.length; i++) {
+        linksList += `
+            <li>
+                <a href='${myTrackedSites[i]} target='blank'>
+                    ${myTrackedSites[i]}
+                </a>
+            </li>`
     }
-    ulEl.innerHTML = myLeadsLinks;
+    ulEl.innerHTML = linksList
 }
 
 deleteBtn.addEventListener('dblclick', function() {
-    localStorage.clear();
-    myLeads = [];
-    render();
+    //console.log('button works')
+    localStorage.clear()
+    myTrackedSites = []
+    displayMyLinks();
 })
 
-saveBtn.addEventListener("click", function() {
-    chrome.tabs.query({active: true, currentWindow: true}, function() {
-        myLeads.push(tabs[0].url);
-        localStorage.setItem("myLeads", JSON.stringify(myLeads));
-        render()
-    })
-})
+//console.log(localStorage.getItem('myLink'))
